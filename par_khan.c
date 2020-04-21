@@ -20,7 +20,7 @@ struct Graph
 
 	// get number of nodes and edges
 	fscanf(fp, "%*d %d %d", &graph.num_nodes, &graph.num_edges);
-	printf("%d %d\n", graph.num_nodes, graph.num_edges);
+	//printf("%d %d\n", graph.num_nodes, graph.num_edges);
 
 	// allocate memory for matrix 2d array
 	graph.matrix = (int **)malloc(graph.num_nodes * sizeof(int *)); 
@@ -44,6 +44,26 @@ struct Graph
 
 }
 
+void get_node_degree(struct Graph graph) {
+
+	int degree[graph.num_nodes];
+
+	for(int i = 0; i < graph.num_nodes; i++) {
+		degree[i] = 0;
+		for (int j = 0; j < graph.num_nodes; j++)
+		{
+			if(graph.matrix[j][i] == 1) {
+				degree[i]++;
+			}
+		}
+	}
+
+	for (int i = 0; i < graph.num_nodes; ++i)
+	{
+		printf("degree of node %d: \t %d\n", i+1, degree[i]);
+	}
+}
+
 
 int main(int argc, char *argv[]) {
 	
@@ -62,20 +82,34 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}	
 
+	// check if file exists
 	if((fp = fopen(file, "r")) != NULL) {
-		struct Graph graph = get_matrix(fp);
-
-		// print matrix
-		for(int i = 0; i < graph.num_nodes; i++) {
-			printf("%d \t", i);
-			for(int j = 0; j < graph.num_nodes; j++) {
-				printf("%d--", graph.matrix[i][j]);
-			}
-			printf("\n");
-		}
 		
+		// create new graph
+		struct Graph graph = get_matrix(fp);
+		get_node_degree(graph);
+
+
+		// // print matrix
+		// for(int i = 0; i < graph.num_nodes; i++) {
+			
+		// 	printf("%d \t", i);
+		// 	for(int j = 0; j < graph.num_nodes; j++) {
+				
+		// 		printf("%d--", graph.matrix[i][j]);
+		// 	}
+
+		// 	printf("\n");
+		// }
+
+		// close file
 		fclose(fp);
+
+		return 0;
+		
 	} else {
+		// if file does not exist
 		printf("the file you specified does not exist\n");
+		return 1;
 	}
 }
