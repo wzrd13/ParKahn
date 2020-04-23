@@ -39,7 +39,7 @@ struct Graph
 		graph.matrix[value1-1][value2-1] = 1;
 	}
 
-	// return graph
+	// Here we return the graph struct that we loaded from the file. This is very important and not self explanetory, dont forget what we do here.
 	return graph;
 
 }
