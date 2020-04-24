@@ -2,25 +2,25 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-struct node{
+struct Node{
     int node_num;
-    struct node* previous_node;
+    struct Node* previous_node;
 };
 
-struct stack{
-    struct node* head;
+struct Stack{
+    struct Node* head;
     int size;
 };
 
-struct stack* init_stack(){
-    struct stack* stack = malloc(sizeof(struct node));
+struct Stack* init_stack(){
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Node));
     stack->head = NULL;
     stack->size = 0;
     return stack;
 }
 
-void push(struct stack* stack, int node_num){
-    struct node* new_node = malloc(sizeof(struct node));
+void push(struct Stack* stack, int node_num){
+    struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
     new_node->node_num = node_num;
     new_node->previous_node = stack->head;
     stack->head = new_node; 
@@ -28,48 +28,54 @@ void push(struct stack* stack, int node_num){
 }
 
 
-bool is_empty(struct stack* stack){
+bool is_empty(struct Stack* stack){
     if(stack->head == NULL){
         return true;
     }
     else return false;
 }
 
-bool pop(struct stack* stack){
+bool pop(struct Stack* stack){
     
     if(is_empty(stack)) return false;
 
-    struct node* top = stack->head;
+    struct Node* top = stack->head;
     stack->head = stack->head->previous_node;
     stack->size = stack->size - 1;
     free(top);
     return true;
 }
 
-int get_head_num(struct stack* stack){
+int get_head_num(struct Stack* stack){
     if(is_empty(stack)){
         return -1;
     }
     return stack->head->node_num;
 }
 
-int get_stack_size(struct stack* stack){
+int return_and_remove_head(struct Stack* stack){
+    int node_num = get_head_num(stack);
+    pop(stack);
+    return node_num;
+}
+
+int get_stack_size(struct Stack* stack){
     return stack->size;
 }
 
-void print_stack(struct stack* stack){
+void print_stack(struct Stack* stack){
 
     if(is_empty(stack)){printf("Stack is empty!\n"); return;}
 
     int N = stack->size;
-    struct node* current_node = stack->head;
+    struct Node* current_node = stack->head;
     for(int i=0; i<N; i++){
         printf("Node val: %d\n", current_node->node_num);
         current_node = current_node->previous_node;
     } 
 }
 
-
+/*
 //STACK PLAYGROUND
 int main(){
 
@@ -97,3 +103,4 @@ int main(){
     printf("\nHead value: %d: \n Stack size: %d \n", get_head_num(stack), get_stack_size(stack));
     return 0;
 }
+*/
