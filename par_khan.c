@@ -64,6 +64,7 @@ struct Stack* sorted;
 
 }
 
+//Fills the degree array with the amount of incomming edges if each node a.k.a. degree.
 struct Array* get_node_degree(struct Graph graph) {
 
 	int set_degree[graph.num_nodes];
@@ -160,7 +161,7 @@ void remove_edge(int n, int m){
 //Checks if the graph has edges. 
 bool graph_has_edges(struct Array* degree){
 	for(int i = 0; i < degree->size; i++) {
-		if(degree->array[1] > 0) return true;
+		if(degree->array[i] > 0) return true;
 	}
 	return false;
 }
@@ -274,6 +275,7 @@ int main(int argc, char *argv[]) {
 		//Initialize the L stack
 		sorted  =  init_stack();
 
+		//Fill the degree array with the amount of incomming edges if each node a.k.a. degree.
 		degree = get_node_degree(graph);
 
 		print_int_array(degree->array, degree->size);
@@ -288,7 +290,7 @@ int main(int argc, char *argv[]) {
 		kahn_algorithm();
 
 		print_int_array(degree->array, degree->size);
-		print_matrix(graph);
+		//print_matrix(graph);
 		//print_matrix(graph);
 
 		return 0;
