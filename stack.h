@@ -12,6 +12,12 @@ struct Stack{
     int size;
 };
 
+
+void red(){ printf("\033[0;31m"); }
+void green(){ printf("\033[0;32m");}
+void yellow(){ printf("\033[0;33m");}
+void reset(){ printf("\033[0m");}
+
 struct Stack* init_stack(){
     struct Stack* stack = (struct Stack*)malloc(sizeof(struct Node));
     stack->head = NULL;
@@ -65,14 +71,32 @@ int get_stack_size(struct Stack* stack){
 
 void print_stack(struct Stack* stack){
 
-    if(is_empty(stack)){printf("Stack is empty!\n"); return;}
+    if(is_empty(stack)){ red();printf("Stack is empty!\n");reset(); return;}
 
     int N = stack->size;
     struct Node* current_node = stack->head;
     for(int i=0; i<N; i++){
-        printf("Node val: %d\n", current_node->node_num);
+        yellow();
+        printf("Stack value: %d\n", current_node->node_num);
+        reset();
         current_node = current_node->previous_node;
     } 
+}
+
+void print_stack_bot_to_top(struct Stack* stack){
+    yellow();
+    printf("Order: ");
+    int* array = (int*)malloc(sizeof(int)*stack->size);
+    struct Node* node = stack->head;
+    for(int i=stack->size-1; i>=0; i--){
+        array[i] = node->node_num;
+        node = node->previous_node;
+    }
+    for(int i=0;i<stack->size; i++){
+        printf("%d , ", array[i]);
+    }
+    printf("\n");
+    reset();
 }
 
 /*

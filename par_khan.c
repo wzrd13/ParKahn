@@ -10,7 +10,7 @@ struct Graph
 	int **matrix;
 };
 
-//when an array is returned from a function the meta data of its size is lost(because of the holly pointers).
+//When an array is returned from a function the meta data of its size is lost(because of the holly pointers).
 //Thats why i implemented a struct Array to hold the size data.
 struct Array{
 	int* array;
@@ -27,6 +27,7 @@ struct Stack* sorted;
 
 
 
+
  struct Graph get_matrix(FILE *fp) {
 	
 	// create graph struct
@@ -38,7 +39,7 @@ struct Stack* sorted;
 
 	// get number of nodes and edges
 	fscanf(fp, "%*d %d %d", &graph.num_nodes, &graph.num_edges);
-	printf("%d %d\n", graph.num_nodes, graph.num_edges);
+	//printf("%d %d\n", graph.num_nodes, graph.num_edges);
 
 	// allocate memory for matrix 2d array
 	graph.matrix = (int **)malloc(graph.num_nodes * sizeof(int *)); 
@@ -84,7 +85,7 @@ void get_node_degree(struct Graph graph) {
 
 //function that returns the nodes where the ouτ edges of requested node go.
 //Take this simple graph for example Example: (2)->(7) , if we run the function on node 2 we will get an array [7,4] of size two.
-//											   └──>(4)
+//                                             └──>(4)
 struct Array get_out_edges(struct Graph graph, int node){
 	//nodes start from number one but matrix starts from 0,0
 	node--;
@@ -158,14 +159,22 @@ void print_int_array(int* array, int size){
 
 //Print Matrix
 void print_matrix(struct Graph graph){
+		printf("%-3c", 'X');
+		for(int i = 0; i < graph.num_nodes; i++) {
+			printf("%3d", i+1);
+		}
+		printf("\n\n");
 
 		 for(int i = 0; i < graph.num_nodes; i++) {
 			
-			printf("%d \t", i+1);
-	 	for(int j = 0; j < graph.num_nodes; j++) {
-				
-		 		printf("%d--", graph.matrix[i][j]);
-		 	}
+			printf("%-3d", i+1);
+			for(int j = 0; j < graph.num_nodes; j++) {
+					
+					//COLOURS!!! XD
+					if(graph.matrix[i][j]==0) printf("%3d", graph.matrix[i][j]);
+					else printf("\033[0;32m%3d\033[0m", graph.matrix[i][j]);
+					
+				}
 
 		 	printf("\n");
 		 }
@@ -194,11 +203,15 @@ void kahn_algorithm(){
 	}
 	//if graph has edges then print "graph has at least one cycle"
 	if(graph_has_edges(graph)==true){
+		red();
 		printf("\nGraph has at least one cycle\n");
+		reset();
 	}
 	else{
-		printf("\nThe following is in a topologically sorted order (printed inverted for the moment LOL)\n");
-		print_stack(sorted);
+		green();
+		printf("\nThe following is in a topologically sorted order.\n");
+		reset();
+		print_stack_bot_to_top(sorted);
 	}
 
 }
@@ -219,13 +232,13 @@ int main(int argc, char *argv[]) {
 		strcpy(file, argv[1]);
 	}
 	else {
-		printf("please type the path to the graph file\n");
+		printf("Please type the path to the graph file\n");
 		return 1;
 	}	
 
 	//if file does not exists
 	if((fp = fopen(file, "r")) == NULL) {
-		printf("the file you specified does not exist\n");
+		printf("The file you specified does not exist\n");
 		return 1;
 	}
 		
