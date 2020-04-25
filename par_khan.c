@@ -21,6 +21,7 @@ struct Array{
 
 //------- GLOBAL VARIABLES --------//
 struct Graph graph;
+struct Array* degree;
 struct Stack* stack;
 struct Stack* sorted;
 //--------------------------------//
@@ -63,24 +64,31 @@ struct Stack* sorted;
 
 }
 
-void get_node_degree(struct Graph graph) {
+struct Array* get_node_degree(struct Graph graph) {
 
-	int degree[graph.num_nodes];
+	int set_degree[graph.num_nodes];
 
 	for(int i = 0; i < graph.num_nodes; i++) {
-		degree[i] = 0;
+		set_degree[i] = 0;
 		for (int j = 0; j < graph.num_nodes; j++)
 		{
 			if(graph.matrix[j][i] == 1) {
-				degree[i]++;
+				set_degree[i]++;
 			}
 		}
 	}
 
-	for (int i = 0; i < graph.num_nodes; ++i)
-	{
-		printf("degree of node %d: \t %d\n", i+1, degree[i]);
+
+	//Return an Array object and allocate space for the global degree.array array.
+	struct Array* degree_array = (struct Array*) malloc(sizeof(set_degree));
+	degree_array->array = malloc(sizeof(set_degree));
+	//fill the new array
+	for(int i = 0; i < graph.num_nodes; i++) {
+		degree_array->array[i] = set_degree[i];
 	}
+	degree_array->size = graph.num_nodes;
+	return degree_array;
+
 }
 
 //function that returns the nodes where the ouτ edges of requested node go.
@@ -110,7 +118,8 @@ struct Array get_out_edges(struct Graph graph, int node){
 }
 
 //function that computes the degree of incoming edges of specified node
-int get_num_of_in_edges(struct Graph graph, int node){
+//This function is DEPRICATED
+int get_num_of_in_edges_from_graph(struct Graph graph, int node){
 	//nodes start from number one but matrix starts from 0,0
 	node--;
 	//compute number of IN edges
@@ -122,10 +131,19 @@ int get_num_of_in_edges(struct Graph graph, int node){
 	return count_in_edges;
 }
 
+
+//function that computes the degree of incoming edges of specified node
+int get_num_of_in_edges(struct Array* degree, int node){
+	//nodes start from number one but matrix starts from 0,0
+	node--;
+	return degree->array[node];
+}
+
+
 //S <- Set of all nodes with no incoming edge
-void fill_S_stack(struct Graph graph, struct Stack* stack){
+void fill_S_stack(struct Array* array, struct Stack* stack){
 	for(int i=1; i<graph.num_nodes+1; i++){
-		if(get_num_of_in_edges(graph, i)==0){
+		if(get_num_of_in_edges(degree, i)==0){
 			push( stack , i);
 			//printf("PUSH");
 		}
@@ -133,16 +151,16 @@ void fill_S_stack(struct Graph graph, struct Stack* stack){
 }
 
 //remove edge from n to m
+//this function only works if the graph and degree are declared globally
 void remove_edge(int n, int m){
+	degree->array[m-1]--;
 	graph.matrix[n-1][m-1] = 0;
 }
 
-//Checks if the graph has edges. (checks if every cell is 0)
-bool graph_has_edges(struct Graph graph){
-	for(int i = 0; i < graph.num_nodes; i++) {
-		for (int j = 0; j < graph.num_nodes; j++){
-			if(graph.matrix[j][i] == 1) return true;
-		}
+//Checks if the graph has edges. 
+bool graph_has_edges(struct Array* degree){
+	for(int i = 0; i < degree->size; i++) {
+		if(degree->array[1] > 0) return true;
 	}
 	return false;
 }
@@ -150,7 +168,7 @@ bool graph_has_edges(struct Graph graph){
 
 //Print array
 void print_int_array(int* array, int size){
-	printf("\nNumber of out edges: %d \n",size);
+	//printf("\nNumber of out edges: %d \n",size);
 	for(int i=0; i<size;i++){
 		printf("%d--", array[i]);
 	}
@@ -192,17 +210,17 @@ void kahn_algorithm(){
 		struct Array nodes_m = get_out_edges(graph, node_n);
 		//print_int_array(nodes_m.array, nodes_m.size);
 		for(int i=0; i<nodes_m.size; i++){
-			//remove edge e from the graph
-			remove_edge( node_n, nodes_m.array[i]);
+			//remove edge e from the array and graph
+			remove_edge(node_n, nodes_m.array[i]);
 			//if m has no other incoming edges then
-			if( get_num_of_in_edges(graph, nodes_m.array[i])==0){
+			if( get_num_of_in_edges(degree, nodes_m.array[i])==0){
 				//insert m into S
 				push(stack, nodes_m.array[i]);
 			}
 		} 
 	}
 	//if graph has edges then print "graph has at least one cycle"
-	if(graph_has_edges(graph)==true){
+	if(graph_has_edges(degree)==true){
 		red();
 		printf("\nGraph has at least one cycle\n");
 		reset();
@@ -248,7 +266,6 @@ int main(int argc, char *argv[]) {
 		fclose(fp);
 
 
-		//get_node_degree(graph);
 
 		print_matrix(graph);
 
@@ -256,16 +273,22 @@ int main(int argc, char *argv[]) {
 		stack =  init_stack();
 		//Initialize the L stack
 		sorted  =  init_stack();
+
+		degree = get_node_degree(graph);
+
+		print_int_array(degree->array, degree->size);
+
 		
 		//Fill with all nodes with no incoming edge
-		fill_S_stack(graph, stack);
+		fill_S_stack(degree, stack);
 
 		print_stack(stack);
 
 		//Run the Glorious Algorithm
 		kahn_algorithm();
 
-
+		print_int_array(degree->array, degree->size);
+		print_matrix(graph);
 		//print_matrix(graph);
 
 		return 0;
