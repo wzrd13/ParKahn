@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <omp.h>
 #include "stack.h"
-
+#include <sys/time.h>
+#include <time.h>
 struct Graph
 {
 	int num_nodes;
@@ -197,13 +199,27 @@ void print_matrix(struct Graph graph){
 }
 
 
+unsigned long get_time() {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        unsigned long ret = tv.tv_usec;
+        ret /= 1000;
+        ret += (tv.tv_sec * 1000);
+        return ret;
+}
+
+
 void kahn_algorithm(){
 	//while S is not empty do
+
+	
 	while(is_empty(stack)==false){
 		//remove a node n from S
+		//#pragma omp critical
 		int node_n =  return_and_remove_head(stack);		
 		//add n to tail of L								//CRITICAL REGION
 		push(sorted, node_n);
+		
 		//for each node m with an edge e from n to m do
 		struct Array nodes_m = get_out_edges(graph, node_n);    //I THINK SAFE REGION
 		//print_int_array(nodes_m.array, nodes_m.size);
@@ -217,6 +233,7 @@ void kahn_algorithm(){
 			}
 		} 
 	}
+	
 	//if graph has edges then print "graph has at least one cycle"
 	if(graph_has_edges(degree)==true){
 		red();
@@ -281,9 +298,16 @@ int main(int argc, char *argv[]) {
 
 		print_stack(stack);
 
+		long start = get_time();
+
 		//Run the Glorious Algorithm
 		kahn_algorithm();
 
+
+		long end =  get_time() - start;
+		yellow();
+		printf("\nTime: %ld \n", end);
+		reset();
 		//print_int_array(degree->array, degree->size);
 		//print_matrix(graph);
 		//print_matrix(graph);
