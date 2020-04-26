@@ -5,6 +5,7 @@
 #include "stack.h"
 #include <sys/time.h>
 #include <time.h>
+
 struct Graph
 {
 	int num_nodes;
@@ -63,32 +64,23 @@ struct Stack* sorted;
 
 }
 
-//Fills the degree array with the amount of incomming edges if each node a.k.a. degree.
-struct Array* get_node_degree(struct Graph graph) {
+struct Array* set_node_degree(struct Array* degree,  struct Graph graph) {
 
-	int set_degree[graph.num_nodes];
+	degree = (struct Array*) malloc(sizeof(struct Array));
+	degree->array = malloc(sizeof(int)*graph.num_nodes);
+	degree->size = graph.num_nodes;
 
 	for(int i = 0; i < graph.num_nodes; i++) {
-		set_degree[i] = 0;
+		degree->array[i] = 0;
 		for (int j = 0; j < graph.num_nodes; j++)
 		{
 			if(graph.matrix[j][i] == 1) {
-				set_degree[i]++;
+				degree->array[i]++;
 			}
 		}
 	}
-
-
-	//Return an Array object and allocate space for the global degree.array array.
-	struct Array* degree_array = (struct Array*) malloc(sizeof(set_degree));
-	degree_array->array = malloc(sizeof(set_degree));
-	//fill the new array
-	for(int i = 0; i < graph.num_nodes; i++) {
-		degree_array->array[i] = set_degree[i];
-	}
-	degree_array->size = graph.num_nodes;
-	return degree_array;
-
+	return degree;
+	
 }
 
 //function that returns the nodes where the ouτ edges of requested node go.
@@ -288,9 +280,10 @@ int main(int argc, char *argv[]) {
 		sorted  =  init_stack();
 
 		//Fill the degree array with the amount of incomming edges if each node a.k.a. degree.
-		degree = get_node_degree(graph);
+		//degree = get_node_degree(graph);
+		degree = set_node_degree(degree, graph);
 
-		//print_int_array(degree->array, degree->size);
+		print_int_array(degree->array, degree->size);
 
 		
 		//Fill with all nodes with no incoming edge
