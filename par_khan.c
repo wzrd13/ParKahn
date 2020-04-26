@@ -18,15 +18,12 @@ struct Array{
 };
 
 
-
 //------- GLOBAL VARIABLES --------//
 struct Graph graph;
 struct Array* degree;
 struct Stack* stack;
 struct Stack* sorted;
 //--------------------------------//
-
-
 
 
  struct Graph get_matrix(FILE *fp) {
@@ -204,13 +201,13 @@ void kahn_algorithm(){
 	//while S is not empty do
 	while(is_empty(stack)==false){
 		//remove a node n from S
-		int node_n =  return_and_remove_head(stack);
-		//add n to tail of L
+		int node_n =  return_and_remove_head(stack);		
+		//add n to tail of L								//CRITICAL REGION
 		push(sorted, node_n);
 		//for each node m with an edge e from n to m do
-		struct Array nodes_m = get_out_edges(graph, node_n);
+		struct Array nodes_m = get_out_edges(graph, node_n);    //I THINK SAFE REGION
 		//print_int_array(nodes_m.array, nodes_m.size);
-		for(int i=0; i<nodes_m.size; i++){
+		for(int i=0; i<nodes_m.size; i++){						//
 			//remove edge e from the array and graph
 			remove_edge(node_n, nodes_m.array[i]);
 			//if m has no other incoming edges then
@@ -234,8 +231,6 @@ void kahn_algorithm(){
 	}
 
 }
-
-
 
 
 int main(int argc, char *argv[]) {
@@ -278,7 +273,7 @@ int main(int argc, char *argv[]) {
 		//Fill the degree array with the amount of incomming edges if each node a.k.a. degree.
 		degree = get_node_degree(graph);
 
-		print_int_array(degree->array, degree->size);
+		//print_int_array(degree->array, degree->size);
 
 		
 		//Fill with all nodes with no incoming edge
@@ -289,7 +284,7 @@ int main(int argc, char *argv[]) {
 		//Run the Glorious Algorithm
 		kahn_algorithm();
 
-		print_int_array(degree->array, degree->size);
+		//print_int_array(degree->array, degree->size);
 		//print_matrix(graph);
 		//print_matrix(graph);
 
