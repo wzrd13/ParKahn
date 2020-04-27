@@ -93,7 +93,7 @@ void print_stack_bot_to_top(struct Stack* stack){
         node = node->previous_node;
     }
     for(int i=0;i<stack->size; i++){
-        printf("%d , ", array[i]);
+        printf("%d , ", array[i]+1);
     }
     printf("\n");
     reset();
