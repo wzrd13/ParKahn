@@ -2,7 +2,7 @@
 CC = gcc
 
 #folders
-BIN=./bin/
+BIN=./bin
 
 PROG_NAME=par_khan
 

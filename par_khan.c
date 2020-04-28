@@ -92,66 +92,79 @@ void print_matrix(struct Graph graph) {
 
 bool kahn_algorithm() {
 	
+	double start, end;
+	
 	// Initialize node degrees
 	int *degree = set_node_degree(graph);
 
 
 	// Initialize S
-	for (int i = 0; i < graph.num_nodes; ++i)
-	{
+	#pragma omp parallel for
+	for (int i = 0; i < graph.num_nodes; ++i) {
 		if (degree[i] == 0)
 		{
 			push(S , i);
 		}		
 	}
 
-	//while S is not empty
-	#pragma omp parallel
-	{
-		#pragma omp single
-		{
-			while(1){
-			
-				#pragma omp task
-				{
-					//remove a node n from S
-					int node_n =  return_and_remove_head(S);		
-					//add n to tail of L								
-					push(L, node_n);
-				
-					//for each node m with an edge e from n to m do
-					for(int i = 0; i < graph.num_nodes; i++){
-						if(graph.matrix[node_n][i] == 1){
-							
-							#pragma omp critical
-							{
-								graph.matrix[node_n][i] = 0;
-								degree[i]--;
-							}
-							
+	// Time only the parallel region for testing
+	start = clock();
 
-							if(degree[i] == 0) {
-								
-								#pragma omp critical
-								{
-									push(S, i);	
-								}
-								
+	omp_set_num_threads(4);
+
+	// int m = 0;
+
+	//while S is not empty
+	#pragma omp parallel shared(L, S, degree)
+	#pragma omp master
+	{
+		while(true){
+
+			#pragma omp task default(shared)
+			{	
+				//remove a node n from S
+				int node_n =  return_and_remove_head(S);
+				
+				//add n to tail of L
+				#pragma omp critical
+				{
+					push(L, node_n);	
+				}			
+				
+			
+				//for each i with an edge e from n to i do
+				for(int i = 0; i < graph.num_nodes; i++){
+					if(graph.matrix[node_n][i] == 1){
+
+						#pragma omp critical
+						{
+							degree[i]--;
+						}
+
+						#pragma omp critical
+						{
+							if(degree[i] == 0) {	
+								push(S, i);	
 							}
 						}
+						
 					}
-
-				}// End of task region
-
-				// Check if stack S is empty
-				#pragma omp taskwait
-				if(is_empty(S) == true) {
-					break;
 				}
+			}										//End of task region
+
+			if(is_empty(S) == true)
+			{
+				#pragma omp taskwait
+
+				if(is_empty(S) == true) break;			
 			}
+
 		}
 	}// End of parallel region
-	
+
+	end = clock();
+
+	printf("Time elapsed: %f\n", (double)end-start);
 	
 	// Check if graph has remaining edges 
 	for(int i = 0; i < graph.num_nodes; i++) {
@@ -202,6 +215,7 @@ int main(int argc, char *argv[]) {
 		red();
 		printf("Graph has at least one cycle\n");
 		reset();
+		print_stack_bot_to_top(L);
 		exit(0);
 	}
 	else {
