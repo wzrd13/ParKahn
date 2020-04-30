@@ -88,53 +88,29 @@ bool kahn_algorithm() {
 	// Time only the parallel region for testing
 	start = clock();
 
-	omp_set_num_threads(4);
-
 	//while S is not empty
-	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp master
-	{
-		while(true){
+	while(is_empty(S)==false){
+		//remove a node n from S
+		int node_n =  return_and_remove_head(S);
 
-			//remove a node n from S
-			int node_n =  return_and_remove_head(S);
-
-			//add n to tail of L
-			push(L, node_n);		
-
-			//printf("tread id: %d\n", omp_get_thread_num());
-
-			#pragma omp task default(shared) firstprivate(node_n)
-			{				
-
-				//add n to tail of L
-				push(L, node_n);
+		//add n to tail of L
+		push(L, node_n);	
 				
-				//for each i with an edge e from n to i do
-				for(int i = 0; i < graph.num_nodes; i++){
-					if(graph.matrix[node_n][i] == 1){
+		//for each i with an edge e from n to i do
+		for(int i = 0; i < graph.num_nodes; i++){
+			if(graph.matrix[node_n][i] == 1){
 
-						#pragma omp critical
-						{
-							degree[i]--;
+				degree[i]--;
 
-							if(degree[i] == 0) {	
-								push(S, i);	
-							}
-						}
-						
-					}
+				if(degree[i] == 0) {	
+					push(S, i);	
 				}
+						
 			}
-
-			if(is_empty(S) == true)
-			{
-				#pragma omp taskwait
-
-				if(is_empty(S) == true) break;			
-			}				
 		}
-	}// End of parallel region
+
+
+	}
 
 	end = clock();
 
@@ -193,14 +169,14 @@ int main(int argc, char *argv[]) {
 		red();
 		printf("Graph has at least one cycle\n");
 		reset();
-		//print_stack_bot_to_top(L);
+		print_stack_bot_to_top(L);
 		exit(0);
 	}
 	else {
 		green();
 		printf("The following is in a topologically correct order.\n");
 		reset();
-		//print_stack_bot_to_top(L);
+		print_stack_bot_to_top(L);
 	}
 
 	return 0;
