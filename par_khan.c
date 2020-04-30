@@ -92,7 +92,7 @@ bool kahn_algorithm() {
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp master
+	#pragma omp single
 	{
 		while(true){
 
