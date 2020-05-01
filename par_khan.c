@@ -92,12 +92,19 @@ bool kahn_algorithm() {
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp single
+	#pragma omp master
 	{
-		while(true){
+		int node_n;
 
-			//remove a node n from S
-			int node_n =  return_and_remove_head(S);
+		while(true){
+		
+			#pragma omp critical
+			{
+				//remove a node n from S
+				node_n =  return_and_remove_head(S);
+			}
+			
+			
 
 			//add n to tail of L
 			push(L, node_n);		
