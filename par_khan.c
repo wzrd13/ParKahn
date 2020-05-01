@@ -69,9 +69,37 @@ int* set_node_degree(struct Graph graph) {
 	return degree;	
 }
 
-bool kahn_algorithm() {
+void remove_edges(int node_n, int *degree) {
+
+	#pragma omp critical
+	{
+		//add n to tail of L
+		push(L, node_n);
+	}
 	
-	double start, end;
+	//for each i with an edge e from n to i do
+	//#pragma omp parallel for
+	for(int i = 0; i < graph.num_nodes; i++){
+		if(graph.matrix[node_n][i] == 1){
+
+			#pragma omp critical
+			{
+				degree[i]--;
+			}
+
+			// Push new nodes to temp stack
+			if(degree[i] == 0) {
+
+				#pragma omp task default(shared) firstprivate(i)
+				{
+					remove_edges(i, degree);
+				}
+			}	
+		}
+	}
+}
+
+bool kahn_algorithm() {	
 	
 	// Initialize node degrees
 	int *degree = set_node_degree(graph);
@@ -86,78 +114,45 @@ bool kahn_algorithm() {
 	}
 
 	// Time only the parallel region for testing
+	double start, end;
 	start = clock();
 
 	omp_set_num_threads(4);
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp single
+	#pragma omp master
 	{
 		int node_n;
 
-		struct Stack* temp;
+		printf("%d\n", omp_get_num_threads());
 
-		while(true){
-		
+		while(is_empty(S) == false) {
+
+			//remove a node n from S
 			#pragma omp critical
-			{
-				//remove a node n from S
-				node_n =  pop(S);
-			}
-			
-			//add n to tail of L
-			push(L, node_n);		
-
-			#pragma omp task default(shared) firstprivate(node_n)\
-			private(temp)
+			node_n =  pop(S);
+				
+			#pragma omp task default(shared) firstprivate(node_n)
 			{		
-				temp = init_stack();
-
-				//for each i with an edge e from n to i do
-				for(int i = 0; i < graph.num_nodes; i++){
-					if(graph.matrix[node_n][i] == 1){
-
-						#pragma omp critical
-						{
-							degree[i]--;
-						}
-
-						// Push new nodes to temp stack
-						if(degree[i] == 0) push(temp, i);	
-					}
-				}
-
-				// Concatinate new nodes to S
-				#pragma omp critical
-				{
-					S = concatinate(S, temp);
-				}
+				remove_edges(node_n, degree);
 			}
 
-			if(is_empty(S) == true)
-			{
-				#pragma omp taskwait
+		}	
 
-				if(is_empty(S) == true) break;			
-			}				
-		}
 	}// End of parallel region
 
 	end = clock();
 
-	printf("Time elapsed: %f\n", (double)end-start);
+	printf("Time elapsed: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
 	
 	// Check if graph has remaining edges 
 	for(int i = 0; i < graph.num_nodes; i++) {
-		if(degree[i] > 0) { 
-			for(int i = 0; i < graph.num_nodes; i++) {
-				printf("degree: %d\n", degree[i]);
-			}
-			return false;
+		
+		if(degree[i] > 0) return false;
 
-		}
 	}
+
 	return true;
 }
 
