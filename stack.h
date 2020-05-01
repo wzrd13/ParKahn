@@ -133,7 +133,9 @@ void print_stack_bot_to_top(struct Stack* stack){
     reset();
 }
 
+
 //STACK PLAYGROUND
+/*
 int main(){
 
     struct Stack* S =  init_stack();
@@ -180,3 +182,4 @@ int main(){
 
     return 0;
 }
+*/

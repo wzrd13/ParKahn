@@ -92,31 +92,28 @@ bool kahn_algorithm() {
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp master
+	#pragma omp single
 	{
 		int node_n;
+
+		struct Stack* temp;
 
 		while(true){
 		
 			#pragma omp critical
 			{
 				//remove a node n from S
-				node_n =  return_and_remove_head(S);
+				node_n =  pop(S);
 			}
 			
-			
-
 			//add n to tail of L
 			push(L, node_n);		
 
-			//printf("tread id: %d\n", omp_get_thread_num());
+			#pragma omp task default(shared) firstprivate(node_n)\
+			private(temp)
+			{		
+				temp = init_stack();
 
-			#pragma omp task default(shared) firstprivate(node_n)
-			{				
-
-				//add n to tail of L
-				push(L, node_n);
-				
 				//for each i with an edge e from n to i do
 				for(int i = 0; i < graph.num_nodes; i++){
 					if(graph.matrix[node_n][i] == 1){
@@ -124,13 +121,17 @@ bool kahn_algorithm() {
 						#pragma omp critical
 						{
 							degree[i]--;
-
-							if(degree[i] == 0) {	
-								push(S, i);	
-							}
 						}
-						
+
+						// Push new nodes to temp stack
+						if(degree[i] == 0) push(temp, i);	
 					}
+				}
+
+				// Concatinate new nodes to S
+				#pragma omp critical
+				{
+					S = concatinate(S, temp);
 				}
 			}
 
