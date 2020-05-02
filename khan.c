@@ -91,7 +91,7 @@ bool kahn_algorithm() {
 	//while S is not empty
 	while(is_empty(S)==false){
 		//remove a node n from S
-		int node_n =  return_and_remove_head(S);
+		int node_n =  pop(S);
 
 		//add n to tail of L
 		push(L, node_n);	
@@ -114,7 +114,7 @@ bool kahn_algorithm() {
 
 	end = clock();
 
-	printf("Time elapsed: %f\n", (double)end-start);
+	printf("Time elapsed: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
 	
 	// Check if graph has remaining edges 
 	for(int i = 0; i < graph.num_nodes; i++) {
@@ -169,14 +169,14 @@ int main(int argc, char *argv[]) {
 		red();
 		printf("Graph has at least one cycle\n");
 		reset();
-		print_stack_bot_to_top(L);
+		//print_stack_bot_to_top(L);
 		exit(0);
 	}
 	else {
 		green();
 		printf("The following is in a topologically correct order.\n");
 		reset();
-		print_stack_bot_to_top(L);
+		//print_stack_bot_to_top(L);
 	}
 
 	return 0;

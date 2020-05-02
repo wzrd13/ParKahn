@@ -146,7 +146,7 @@ bool kahn_algorithm() {
 
 	end = clock();
 
-	printf("Time elapsed: %f\n", (double)end-start);
+	printf("Time elapsed: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
 	
 	// Check if graph has remaining edges 
 	for(int i = 0; i < graph.num_nodes; i++) {
