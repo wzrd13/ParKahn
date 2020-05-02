@@ -78,7 +78,7 @@ void remove_edges(int node_n, int *degree) {
 	}
 	
 	//for each i with an edge e from n to i do
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for(int i = 0; i < graph.num_nodes; i++){
 		if(graph.matrix[node_n][i] == 1){
 
@@ -114,7 +114,7 @@ bool kahn_algorithm() {
 	double start, end;
 	start = clock();
 
-	omp_set_num_threads(4);
+	omp_set_num_threads(32);
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph)
@@ -127,17 +127,14 @@ bool kahn_algorithm() {
 		while(is_empty(S) == false) {
 
 			//remove a node n from S
-			#pragma omp critical
 			node_n =  pop(S);
 				
 			#pragma omp task default(shared) firstprivate(node_n)
 			{		
 				remove_edges(node_n, degree);
 			}
-
-		}	
-
-	}// End of parallel region
+		}
+	}
 
 	end = clock();
 
