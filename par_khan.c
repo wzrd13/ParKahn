@@ -82,18 +82,15 @@ void remove_edges(int node_n, int *degree) {
 	for(int i = 0; i < graph.num_nodes; i++){
 		if(graph.matrix[node_n][i] == 1){
 
-			#pragma omp critical
-			{
-				degree[i]--;
-			}
+			#pragma omp atomic
+			degree[i]--;
 
 			// Push new nodes to temp stack
 			if(degree[i] == 0) {
 
 				#pragma omp task default(shared) firstprivate(i)
-				{
-					remove_edges(i, degree);
-				}
+				remove_edges(i, degree);
+
 			}	
 		}
 	}
@@ -121,7 +118,7 @@ bool kahn_algorithm() {
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp master
+	#pragma omp single nowait
 	{
 		int node_n;
 
