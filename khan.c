@@ -71,7 +71,7 @@ int* set_node_degree(struct Graph graph) {
 
 bool kahn_algorithm() {
 	
-	double start, end;
+	struct timeval start, end;
 	
 	// Initialize node degrees
 	int *degree = set_node_degree(graph);
@@ -86,7 +86,7 @@ bool kahn_algorithm() {
 	}
 
 	// Time only the parallel region for testing
-	start = clock();
+	gettimeofday(&start, 0);
 
 	//while S is not empty
 	while(is_empty(S)==false){
@@ -112,9 +112,10 @@ bool kahn_algorithm() {
 
 	}
 
-	end = clock();
+	gettimeofday(&end, 0);
 
-	printf("Time elapsed: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+	double time_elapsed = (end.tv_sec-start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec)*1e-6;
+	printf("Time elapsed: %f\n", time_elapsed);
 	
 	// Check if graph has remaining edges 
 	for(int i = 0; i < graph.num_nodes; i++) {
