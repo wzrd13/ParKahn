@@ -85,13 +85,22 @@ bool kahn_algorithm() {
 		}		
 	}
 
+	// Intialize locks
+	omp_nest_lock_t *locks = malloc(graph.num_nodes*sizeof(omp_nest_lock_t));
+	for (int i = 0; i < graph.num_nodes; ++i)
+	{
+		omp_init_nest_lock(&locks[i]);
+	}
+
+
+
 	// Time only the parallel region for testing
 	start = clock();
 
 	omp_set_num_threads(4);
 
 	//while S is not empty
-	#pragma omp parallel shared(L, S, degree, graph)
+	#pragma omp parallel shared(L, S, degree, graph, locks)
 	#pragma omp single
 	{
 		int node_n;
@@ -118,10 +127,9 @@ bool kahn_algorithm() {
 				for(int i = 0; i < graph.num_nodes; i++){
 					if(graph.matrix[node_n][i] == 1){
 
-						#pragma omp critical
-						{
-							degree[i]--;
-						}
+						omp_set_nest_lock(&locks[i]);
+						degree[i]--;
+						omp_unset_nest_lock(&locks[i]);
 
 						// Push new nodes to temp stack
 						if(degree[i] == 0) push(temp, i);	
