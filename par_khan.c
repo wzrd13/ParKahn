@@ -33,7 +33,8 @@ struct Graph get_matrix(FILE *fp) {
 	//printf("%d %d\n", graph.num_nodes, graph.num_edges);
 
 	// Allocate memory for matrix 2d array
-	graph.matrix = (int **)malloc(graph.num_nodes * sizeof(int *)); 
+	graph.matrix = (int **)malloc(graph.num_nodes * sizeof(int *));
+
     for (int i=0; i<graph.num_nodes; i++) 
          graph.matrix[i] = (int *)malloc(graph.num_nodes * sizeof(int));
 
@@ -69,28 +70,26 @@ int* set_node_degree(struct Graph graph) {
 	return degree;	
 }
 
-void remove_edges(int node_n, int *degree) {
+void remove_edges(int node_n, int *degree, omp_nest_lock_t *locks) {
 
+	//add n to tail of L
 	#pragma omp critical
 	{
-		//add n to tail of L
 		push(L, node_n);
 	}
 	
 	//for each i with an edge e from n to i do
-	#pragma omp parallel for
 	for(int i = 0; i < graph.num_nodes; i++){
 		if(graph.matrix[node_n][i] == 1){
 
-			#pragma omp atomic
+			omp_set_nest_lock(&locks[i]);
 			degree[i]--;
+			omp_unset_nest_lock(&locks[i]);
 
 			// Push new nodes to temp stack
 			if(degree[i] == 0) {
-
-				#pragma omp task default(shared) firstprivate(i)
-				remove_edges(i, degree);
-
+				#pragma omp task default(shared) firstprivate(i) untied
+				remove_edges(i, degree, locks);
 			}	
 		}
 	}
@@ -101,7 +100,6 @@ bool kahn_algorithm() {
 	// Initialize node degrees
 	int *degree = set_node_degree(graph);
 
-
 	// Initialize S
 	for (int i = 0; i < graph.num_nodes; ++i) {
 		if (degree[i] == 0)
@@ -110,19 +108,26 @@ bool kahn_algorithm() {
 		}		
 	}
 
+	// Intialize locks
+	omp_nest_lock_t *locks = malloc(graph.num_nodes*sizeof(omp_nest_lock_t));
+	for (int i = 0; i < graph.num_nodes; ++i)
+	{
+		omp_init_nest_lock(&locks[i]);
+	}
+
 	// Time only the parallel region for testing
 	double start, end;
+	
+
+	omp_set_num_threads(4);
 	start = clock();
 
-	omp_set_num_threads(32);
-
 	//while S is not empty
-	#pragma omp parallel shared(L, S, degree, graph)
-	#pragma omp single nowait
+	#pragma omp parallel shared(L, S, degree, graph, locks)
+	#pragma omp master
 	{
-		int node_n;
 
-		printf("%d\n", omp_get_num_threads());
+		int node_n;
 
 		while(is_empty(S) == false) {
 
@@ -131,7 +136,7 @@ bool kahn_algorithm() {
 				
 			#pragma omp task default(shared) firstprivate(node_n)
 			{		
-				remove_edges(node_n, degree);
+				remove_edges(node_n, degree, locks);
 			}
 		}
 	}
@@ -140,7 +145,7 @@ bool kahn_algorithm() {
 
 	printf("Time elapsed: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
 	
-	// Check if graph has remaining edges 
+	// Check if graph has remaining edges
 	for(int i = 0; i < graph.num_nodes; i++) {
 		
 		if(degree[i] > 0) return false;

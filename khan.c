@@ -119,9 +119,6 @@ bool kahn_algorithm() {
 	// Check if graph has remaining edges 
 	for(int i = 0; i < graph.num_nodes; i++) {
 		if(degree[i] > 0) { 
-			for(int i = 0; i < graph.num_nodes; i++) {
-				printf("degree: %d\n", degree[i]);
-			}
 			return false;
 
 		}

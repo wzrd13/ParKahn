@@ -15,7 +15,7 @@ CFLAGS  = -g -Wall -fopenmp
 TARGET = par_khan
 LIST = $(addprefix $(BIN)/, $(TARGET))
 
-all: $(PROG_NAME)
+all: $(PROG_NAME) kahn
 
 $(PROG_NAME): $(TARGET).c
 	$(CC) $(CFLAGS) -o $(LIST) $(TARGET).c
