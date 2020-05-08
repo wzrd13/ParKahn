@@ -86,7 +86,7 @@ bool kahn_algorithm() {
 	}
 
 	// Time only the parallel region for testing
-	gettimeofday(&start, 0);
+	gettimeofday(&start, NULL);
 
 	//while S is not empty
 	while(is_empty(S)==false){
@@ -112,7 +112,7 @@ bool kahn_algorithm() {
 
 	}
 
-	gettimeofday(&end, 0);
+	gettimeofday(&end, NULL);
 
 	double time_elapsed = (end.tv_sec-start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec)*1e-6;
 	printf("Time elapsed: %f\n", time_elapsed);

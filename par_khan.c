@@ -117,9 +117,11 @@ bool kahn_algorithm() {
 
 	// Time only the parallel region for testing
 	struct timeval start, end;
+	double s, e;
 	
 	omp_set_num_threads(4);
-	gettimeofday(&start, 0);
+	gettimeofday(&start, NULL);
+	s = omp_get_wtime();
 
 	//while S is not empty
 	#pragma omp parallel shared(L, S, degree, graph, locks)
@@ -140,10 +142,12 @@ bool kahn_algorithm() {
 		}
 	}
 
-	gettimeofday(&end, 0);
+	gettimeofday(&end, NULL);
+	e = omp_get_wtime();
 
 	double time_elapsed = (end.tv_sec-start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec)*1e-6;
-	printf("Time elapsed: %f\n", time_elapsed);
+	printf("Time elapsed gettimeofday: %f\n", time_elapsed);
+	printf("Time elapsed omp: %f\n", (double)(e-s));
 	
 	// Check if graph has remaining edges
 	for(int i = 0; i < graph.num_nodes; i++) {
