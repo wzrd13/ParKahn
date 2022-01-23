@@ -1,4 +1,4 @@
-# ParKhan
+# ParKahn
 A parallel version of Kahn’s algorithm for Topological Sorting using OPENMP
  
 ## Description of files in this project
